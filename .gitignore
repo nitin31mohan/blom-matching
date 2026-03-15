@@ -45,3 +45,7 @@ frontend/*/build/
 .vscode/
 *.swp
 *.swo
+
+# Planning / AI tooling — proprietary, not for public repo
+.claude/
+.paul/
