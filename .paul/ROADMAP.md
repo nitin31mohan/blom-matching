@@ -17,8 +17,8 @@ Phases: 0 of 6 complete
 | 01 | Foundation | 3 | ✅ Complete | 2026-03-15 |
 | 02 | Core Algorithm | 2 | ✅ Complete | 2026-03-15 |
 | 03 | Agent Layer | 2 | ✅ Complete | 2026-03-15 |
-| 04 | Evaluation | 2 | Not started | - |
-| 05 | Frontend | 3 | Not started | - |
+| 04 | Evaluation | 2 | ✅ Complete | 2026-03-15 |
+| 05 | Frontend | 7 | ✅ Complete | 2026-03-15 |
 | 06 | API + Deployment | 2 | Not started | - |
 
 ## Phase Details
@@ -85,8 +85,8 @@ Phases: 0 of 6 complete
 - Post-event feedback ingestion + feature reweighting
 
 **Plans:**
-- [ ] 04-01: Proxy metrics implementation
-- [ ] 04-02: Feedback ingestion + reweighting
+- [x] 04-01: Proxy metrics implementation ✅
+- [x] 04-02: Feedback ingestion + reweighting ✅
 
 ### Phase 05: Frontend
 
@@ -100,9 +100,13 @@ Phases: 0 of 6 complete
 - Portfolio demo with synthetic seed, no auth
 
 **Plans:**
-- [ ] 05-01: Shared canvas component library
-- [ ] 05-02: Operator tool (Prong 1)
-- [ ] 05-03: Portfolio demo (Prong 2)
+- [x] 05-01: Bootstrap + shared canvas components ✅
+- [x] 05-02: Zustand store + basic panels (foundation) ✅
+- [x] 05-03: Full prototype port — attractors, throw, reassign, live fit, header, trait panel ✅
+- [x] 05-04: Two-axis algorithm upgrade (valuesCohesion + dominanceBalance, activity profiles, view toggle) ✅
+- [x] 05-05: Freeze/approve/straggler workflow — board lock, late sign-up placement, visual indicators ✅
+- [x] 05-06: Group deletion + touch/pointer events — drag-to-bin, dynamic GROUP_LAYOUT, tablet-friendly ✅
+- [x] 05-07: Portfolio demo (Prong 2) — synthetic seed, no auth ✅
 
 ### Phase 06: API + Deployment
 
@@ -121,4 +125,4 @@ Phases: 0 of 6 complete
 
 ---
 *Roadmap created: 2026-03-15*
-*Last updated: 2026-03-15 — Phase 03 complete*
+*Last updated: 2026-03-15 — Phase 05 complete*

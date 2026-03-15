@@ -1,0 +1,42 @@
+import type { Attendee, GroupLayout, MockEvent } from '../types'
+
+export const DEMO_EVENTS: MockEvent[] = [
+  { name: 'Pub quiz — social night', activityType: 'pub_quiz',     socialIntent: 'social'  },
+  { name: 'Life drawing — singles',  activityType: 'life_drawing', socialIntent: 'singles' },
+]
+
+export const DEMO_GROUP_LAYOUT: GroupLayout[] = [
+  { group_id: 'alpha', color: '#8b5cf6', cx: 0.25, cy: 0.38 },
+  { group_id: 'beta',  color: '#0ea5e9', cx: 0.60, cy: 0.32 },
+  { group_id: 'gamma', color: '#f97316', cx: 0.75, cy: 0.62 },
+  { group_id: 'delta', color: '#10b981', cx: 0.35, cy: 0.70 },
+]
+
+// 16 synthetic attendees in 4 groups of 4.
+// Traits: [Social energy, Openness, Conscientiousness, Agreeableness, Eco values] — values in [1,5]
+// alpha: cohesive high-openness → mostly green nodes
+// beta: balanced moderate profiles → green/amber
+// gamma: divergent traits → amber/red (visual contrast for demo)
+// delta: eco-focused moderate cohesion
+export const DEMO_ATTENDEES: Attendee[] = [
+  // alpha (purple) — cohesive
+  { pipeline_user_id: 'demo-01', display_name: 'Amara',  group_id: 'alpha', traits: [4, 5, 3, 5, 4] },
+  { pipeline_user_id: 'demo-02', display_name: 'Bram',   group_id: 'alpha', traits: [3, 5, 4, 4, 5] },
+  { pipeline_user_id: 'demo-03', display_name: 'Cleo',   group_id: 'alpha', traits: [4, 4, 3, 5, 4] },
+  { pipeline_user_id: 'demo-04', display_name: 'Dario',  group_id: 'alpha', traits: [3, 5, 3, 4, 5] },
+  // beta (sky) — balanced
+  { pipeline_user_id: 'demo-05', display_name: 'Esme',   group_id: 'beta',  traits: [4, 3, 5, 3, 2] },
+  { pipeline_user_id: 'demo-06', display_name: 'Felix',  group_id: 'beta',  traits: [3, 3, 5, 4, 2] },
+  { pipeline_user_id: 'demo-07', display_name: 'Gia',    group_id: 'beta',  traits: [5, 2, 5, 3, 3] },
+  { pipeline_user_id: 'demo-08', display_name: 'Hiro',   group_id: 'beta',  traits: [4, 3, 4, 4, 2] },
+  // gamma (orange) — divergent
+  { pipeline_user_id: 'demo-09', display_name: 'Isla',   group_id: 'gamma', traits: [5, 5, 1, 2, 5] },
+  { pipeline_user_id: 'demo-10', display_name: 'Juno',   group_id: 'gamma', traits: [1, 2, 5, 5, 1] },
+  { pipeline_user_id: 'demo-11', display_name: 'Kai',    group_id: 'gamma', traits: [4, 4, 2, 1, 4] },
+  { pipeline_user_id: 'demo-12', display_name: 'Lena',   group_id: 'gamma', traits: [2, 3, 4, 4, 2] },
+  // delta (emerald) — eco-focused
+  { pipeline_user_id: 'demo-13', display_name: 'Milo',   group_id: 'delta', traits: [2, 4, 4, 3, 5] },
+  { pipeline_user_id: 'demo-14', display_name: 'Nadia',  group_id: 'delta', traits: [3, 3, 4, 4, 5] },
+  { pipeline_user_id: 'demo-15', display_name: 'Oscar',  group_id: 'delta', traits: [4, 4, 3, 3, 4] },
+  { pipeline_user_id: 'demo-16', display_name: 'Petra',  group_id: 'delta', traits: [2, 4, 5, 4, 5] },
+]

@@ -49,6 +49,19 @@ system backed by a human-in-the-loop LLM review layer.
 | parse_operator_overrides imported inside compile_output (not module-level) | 03-02 | Avoids circular import: override_parser → schemas + matching → workflow |
 | OverrideParseResult lives in override_parser.py, not schemas.py | 03-02 | Internal LLM schema; public API is list[OperatorOverride] only |
 | workflow_trace_id via model_copy(update=...) after get_current_run_tree() | 03-02 | Immutable Pydantic pattern; "local" fallback when LangSmith inactive |
+| suggest_weight_adjustments threshold >= 0.5 | 04-02 | Boundary at 0.5 confirms algorithm working |
+| All-equal weight guard in suggest_weight_adjustments | 04-02 | Prevents meaningless max/min assignment on flat weight dicts |
+| Two-axis fit: valuesCohesion (indices 1,3,4) + dominanceBalance + pairCompatibility | 05-04 | Social: catalystBalance; singles: assertivenessMatch — branched via profile.socialIntent |
+| Derived assertiveness = social_energy×0.6 + (6-agreeableness)×0.4 | 05-04 | Avoids new questionnaire fields; uses existing trait indices 0 and 3 |
+| ActivityProfile carries all per-event config (weights, catalystTarget, window, socialIntent) | 05-04 | Single config object; adding new event types = one record in ACTIVITY_PROFILES |
+| GroupHull V:XX D:XX uses two sibling <text> elements (not tspan) | 05-04 | SVG tspan fill inheritance is browser-inconsistent |
+| Lock icon badge (SVG padlock) replaces green ring on approved+frozen nodes | 05-05 | Ring was not visually noticeable; padlock communicates locked state semantically |
+| groupSizeLimit (combobox) replaces frozenGroupSizes (implicit baseline) | 05-05 | Baseline from empty {} caused false +5 over-capacity on first load |
+| Window listeners over setPointerCapture for node/hull drag | 05-06 | Capture routes click events to SVG → onClearSelection fires → selection lost |
+| DEFAULT_GROUP_LAYOUT + GROUP_LAYOUT alias in mock-data.ts | 05-06 | App gains reactive groupLayout state; ForceCanvas import unchanged |
+| handleDeleteGroup: remainingLayout.length === 0 guard → no-op | 05-06 | Cannot delete last group; straggler redistribution requires ≥1 target group |
+| Verbatim file copy (no shared package) for demo app | 05-07 | Simpler for v0.1; Phase 06 can extract shared lib if needed |
+| useMemo for dummyAssignment in demo App | 05-07 | Stable object reference prevents ForceCanvas simulation restart on re-render |
 
 ## Validated Requirements
 
@@ -61,6 +74,15 @@ system backed by a human-in-the-loop LLM review layer.
 - ✓ LangGraph review workflow (explain → flag → checkpoint → compile) — Phase 03-01
 - ✓ NL override parsing with ID validation (parse_operator_overrides) — Phase 03-02
 - ✓ LangSmith tracing via @traceable + workflow_trace_id in ReviewedResult — Phase 03-02
+- ✓ Proxy metrics (within-group similarity, flag rate) — Phase 04-01
+- ✓ Post-event feedback ingestion + feature reweighting — Phase 04-02
+- ✓ Force-directed canvas (ForceCanvas, AttendeeNode, GroupHull) with D3 — Phase 05-01
+- ✓ Two-axis fit scoring (valuesCohesion, dominanceBalance, pairCompatibility) — Phase 05-04
+- ✓ Activity profiles for per-event algorithm config — Phase 05-04
+- ✓ Freeze/approve/straggler workflow with visual indicators — Phase 05-05
+- ✓ Group deletion via drag-to-bin; dynamic GROUP_LAYOUT state — Phase 05-06
+- ✓ Pointer Events API (touch + mouse unified); 44px tap targets — Phase 05-06
+- ✓ Portfolio demo (Prong 2): frontend/demo/ Vite app, synthetic seed, no auth — Phase 05-07
 
 ---
-*Last updated: 2026-03-15 after Phase 03*
+*Last updated: 2026-03-15 after Phase 05*
