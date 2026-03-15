@@ -7,3 +7,12 @@ event_type_modifiers:
     gender_imbalance_threshold: 0.75
   social:
     values_alignment_multiplier: 1.2
+
+fit_thresholds:
+  great: 0.68
+  okay: 0.42
+
+assignment:
+  group_size_min: 3
+  group_size_max: 6
+  target_group_size: 5

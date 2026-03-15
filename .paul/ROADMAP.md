@@ -15,8 +15,8 @@ Phases: 0 of 6 complete
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 01 | Foundation | 3 | ✅ Complete | 2026-03-15 |
-| 02 | Core Algorithm | 2 | Not started | - |
-| 03 | Agent Layer | 2 | Not started | - |
+| 02 | Core Algorithm | 2 | ✅ Complete | 2026-03-15 |
+| 03 | Agent Layer | 2 | Planning | - |
 | 04 | Evaluation | 2 | Not started | - |
 | 05 | Frontend | 3 | Not started | - |
 | 06 | API + Deployment | 2 | Not started | - |
@@ -54,8 +54,8 @@ Phases: 0 of 6 complete
 - Integration tests with synthetic data
 
 **Plans:**
-- [ ] 02-01: Similarity computation + affinity matrix
-- [ ] 02-02: Constrained group assignment
+- [x] 02-01: Similarity computation + affinity matrix
+- [x] 02-02: Constrained group assignment
 
 ### Phase 03: Agent Layer
 
