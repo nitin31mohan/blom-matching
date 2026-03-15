@@ -49,7 +49,7 @@ None.
 None.
 
 ### Git State
-Last commit: (pending — phase commit to be created)
+Last commit: 6c6eafc feat(01-foundation): Attendee schema, PII anonymiser, and feature engineering pipeline
 Branch: main (no feature branches)
 
 ## Session Continuity
