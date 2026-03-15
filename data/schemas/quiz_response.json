@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RawQuizResponse",
+  "description": "Raw attendee quiz response as received from Blom's backend. PII fields (id, name) are stripped at the pipeline boundary by anonymiser.strip_pii().",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "gender",
+    "industry",
+    "country",
+    "energised_meeting_people",
+    "keeps_atmosphere_harmonious",
+    "enjoys_unfamiliar_experiences",
+    "shows_up_on_time",
+    "anxious_in_social_situations",
+    "interested_in_current_events",
+    "religious_identity",
+    "spirituality_importance",
+    "eco_friendly_choices",
+    "physical_activity_routine",
+    "conversation_style",
+    "messages_regularly_after_clicking",
+    "comfortable_knowing_nobody",
+    "shares_personal_stories",
+    "weekend_energy_level",
+    "preferred_activity_time",
+    "humour_style"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Blom internal user ID — PII, stripped at pipeline boundary"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full name — PII, reduced to first name only at pipeline boundary"
+    },
+    "friend_pair_id": {
+      "type": ["string", "null"],
+      "description": "Shared UUID with one mutual friend in the same event. Both parties carry the same value.",
+      "default": null
+    },
+    "gender": {
+      "type": ["string", "null"],
+      "enum": ["man", "woman", null],
+      "description": "GDPR Art. 9 sensitive category"
+    },
+    "industry": {
+      "type": ["string", "null"],
+      "enum": [
+        "Technology", "Finance", "Healthcare", "Education", "Creative/Media",
+        "Retail", "Legal", "Hospitality", "Construction", "Transport",
+        "Public Sector", "Charity/NGO", "Science/Research", "Sports/Fitness",
+        "Other", null
+      ]
+    },
+    "country": {
+      "type": ["string", "null"],
+      "description": "ISO 3166-1 alpha-2 country code"
+    },
+    "energised_meeting_people": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Likert 1=strongly disagree, 5=strongly agree"
+    },
+    "keeps_atmosphere_harmonious": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "enjoys_unfamiliar_experiences": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "shows_up_on_time": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "anxious_in_social_situations": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "interested_in_current_events": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "religious_identity": {
+      "type": ["string", "null"],
+      "enum": [
+        "No religion", "Christian", "Muslim", "Hindu", "Jewish", "Buddhist",
+        "Sikh", "Spiritual but not religious", "Agnostic", "Atheist", "Other", null
+      ],
+      "description": "GDPR Art. 9 sensitive category"
+    },
+    "spirituality_importance": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "eco_friendly_choices": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "physical_activity_routine": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "conversation_style": {
+      "type": ["string", "null"],
+      "enum": ["deep_diver", "light_banter", "storyteller", "listener", "debater", null]
+    },
+    "messages_regularly_after_clicking": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "comfortable_knowing_nobody": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "shares_personal_stories": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "weekend_energy_level": {
+      "type": ["string", "null"],
+      "enum": ["High", "Medium", "Low", null]
+    },
+    "preferred_activity_time": {
+      "type": ["string", "null"],
+      "enum": ["Morning", "Afternoon", "Evening", null]
+    },
+    "humour_style": {
+      "type": ["string", "null"],
+      "enum": ["playful", "situational_observational", "witty_sarcastic", "bold_edgy", null]
+    }
+  },
+  "additionalProperties": false
+}
