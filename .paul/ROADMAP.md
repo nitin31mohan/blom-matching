@@ -16,7 +16,7 @@ Phases: 0 of 6 complete
 |-------|------|-------|--------|-----------|
 | 01 | Foundation | 3 | ✅ Complete | 2026-03-15 |
 | 02 | Core Algorithm | 2 | ✅ Complete | 2026-03-15 |
-| 03 | Agent Layer | 2 | Planning | - |
+| 03 | Agent Layer | 2 | ✅ Complete | 2026-03-15 |
 | 04 | Evaluation | 2 | Not started | - |
 | 05 | Frontend | 3 | Not started | - |
 | 06 | API + Deployment | 2 | Not started | - |
@@ -70,8 +70,8 @@ Phases: 0 of 6 complete
 - LangSmith trace setup
 
 **Plans:**
-- [ ] 03-01: LangGraph workflow + prompt templates
-- [ ] 03-02: Override parsing + LangSmith integration
+- [x] 03-01: LangGraph workflow + prompt templates
+- [x] 03-02: Override parsing + LangSmith integration
 
 ### Phase 04: Evaluation
 
@@ -121,4 +121,4 @@ Phases: 0 of 6 complete
 
 ---
 *Roadmap created: 2026-03-15*
-*Last updated: 2026-03-15 — Phase 01 complete*
+*Last updated: 2026-03-15 — Phase 03 complete*

@@ -43,6 +43,12 @@ system backed by a human-in-the-loop LLM review layer.
 | enjoys_unfamiliar_experiences → values_alignment group (1.2× weight) | 01-03 | Openness proxy; test requires all fields assigned |
 | Sensitive fields excluded from vector in neutral mode (vector length changes) | 01-03 | 38-dim neutral, 67-dim affinity; Phase 02 must handle variable length |
 | high_anxiety flag uses raw value before imputation | 01-03 | Avoids false positives from median-filled data |
+| LangGraph 4-node StateGraph with interrupt_before=["human_checkpoint"] | 03-01 | Enables pause/resume for human review without graph recompilation |
+| Mock target: src.agent.workflow.ChatAnthropic (not langchain_anthropic directly) | 03-01 | Module-level import requires patching at call site |
+| mock_chain.ainvoke = AsyncMock(return_value=resp) pattern for structured output chains | 03-01 | Workflow calls .ainvoke() on chain — patching __call__ is wrong |
+| parse_operator_overrides imported inside compile_output (not module-level) | 03-02 | Avoids circular import: override_parser → schemas + matching → workflow |
+| OverrideParseResult lives in override_parser.py, not schemas.py | 03-02 | Internal LLM schema; public API is list[OperatorOverride] only |
+| workflow_trace_id via model_copy(update=...) after get_current_run_tree() | 03-02 | Immutable Pydantic pattern; "local" fallback when LangSmith inactive |
 
 ## Validated Requirements
 
@@ -50,6 +56,11 @@ system backed by a human-in-the-loop LLM review layer.
 - ✓ Synthetic data generator (deterministic, scales to 500) — Phase 01-01
 - ✓ PII anonymisation utilities (strip_pii, export_for_demo) — Phase 01-02
 - ✓ Feature engineering pipeline (encoder, weights, modifiers) — Phase 01-03
+- ✓ Cosine similarity affinity matrix — Phase 02-01
+- ✓ Constrained greedy group assignment with friend-pair hard constraints — Phase 02-02
+- ✓ LangGraph review workflow (explain → flag → checkpoint → compile) — Phase 03-01
+- ✓ NL override parsing with ID validation (parse_operator_overrides) — Phase 03-02
+- ✓ LangSmith tracing via @traceable + workflow_trace_id in ReviewedResult — Phase 03-02
 
 ---
-*Last updated: 2026-03-15 after Phase 01*
+*Last updated: 2026-03-15 after Phase 03*
