@@ -10,6 +10,8 @@ class RunMatchingRequest(BaseModel):
 
     target_group_size: int = 5
     sensitive_field_mode: Literal["neutral", "affinity", "diversity"] = "neutral"
+    n_groups: int | None = None        # overrides target_group_size when set
+    max_group_size: int = 6            # hard cap — attendees overflow to least-full group if exceeded
 
 
 class OverrideRequest(BaseModel):

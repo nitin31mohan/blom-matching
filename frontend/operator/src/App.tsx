@@ -4,8 +4,16 @@ import { MOCK_ASSIGNMENT, MOCK_ATTENDEES, MOCK_EVENTS, MOCK_STRAGGLERS, DEFAULT_
 import { placeAllStragglers } from './lib/straggler'
 import { useCanvasStore } from './store/canvas.store'
 import AttendeeDetail from './panels/AttendeeDetail'
-import type { Attendee, SimNode, MockEvent, PairScoreMap, GroupLayout } from './types'
+import type { Attendee, GroupAssignment, SimNode, MockEvent, PairScoreMap, GroupLayout } from './types'
 import { getActivityProfile } from './lib/activity-profiles'
+
+const GROUP_COLORS = ['#8b5cf6', '#0ea5e9', '#f97316', '#10b981', '#f43f5e', '#eab308', '#06b6d4', '#84cc16']
+const GROUP_POSITIONS = [
+  { cx: 0.25, cy: 0.40 }, { cx: 0.58, cy: 0.35 },
+  { cx: 0.78, cy: 0.58 }, { cx: 0.38, cy: 0.72 },
+  { cx: 0.60, cy: 0.20 }, { cx: 0.20, cy: 0.65 },
+  { cx: 0.70, cy: 0.80 }, { cx: 0.45, cy: 0.55 },
+]
 
 const SIDEBAR_WIDTH = 320
 const HEADER_HEIGHT = 72
@@ -13,6 +21,7 @@ const HEADER_HEIGHT = 72
 export default function App() {
   const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight })
   const [attendees, setAttendees] = useState<Attendee[]>(MOCK_ATTENDEES)
+  const [assignment, setAssignment] = useState<GroupAssignment>(MOCK_ASSIGNMENT)
   const [selectedEvent, setSelectedEvent] = useState<MockEvent>(MOCK_EVENTS[0])
   const [resetKey, setResetKey] = useState(0)
   const [viewMode, setViewMode] = useState<'simple' | 'detailed'>('simple')
@@ -23,7 +32,10 @@ export default function App() {
   const [groupSizeLimit, setGroupSizeLimit] = useState(5)
   const [groupSizeLimitInput, setGroupSizeLimitInput] = useState('5')
   const [stragglerMessage, setStragglerMessage] = useState<string | null>(null)
-  const { clearSelection } = useCanvasStore()
+  const [nGroups, setNGroups] = useState(4)
+  const [nGroupsInput, setNGroupsInput] = useState('4')
+  const [isRerunning, setIsRerunning] = useState(false)
+  const { clearSelection, setAlgorithmGroups } = useCanvasStore()
   const { selectedAttendeeId, selectAttendee } = useCanvasStore()
 
   const activeProfile = getActivityProfile(selectedEvent)
@@ -33,6 +45,91 @@ export default function App() {
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
+
+  // Shared API fetch — called on mount and by "Re-run" button
+  const runMatchingApi = async (requestedNGroups: number, requestedMaxGroupSize: number) => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
+    const apiKey = import.meta.env.VITE_OPERATOR_API_KEY
+    if (!apiBase || !apiKey) return
+
+    const loadRes = await fetch(`${apiBase}/api/events/demo/load`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}` },
+    })
+    if (!loadRes.ok) throw new Error(`load failed: ${loadRes.status}`)
+    const { session_token } = await loadRes.json()
+
+    const runRes = await fetch(`${apiBase}/api/matching/demo/run`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'X-Session-Token': session_token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sensitive_field_mode: 'neutral',
+        n_groups: requestedNGroups,
+        max_group_size: requestedMaxGroupSize,
+      }),
+    })
+    if (!runRes.ok) throw new Error(`run failed: ${runRes.status}`)
+    return runRes.json()
+  }
+
+  // Load algorithm groupings from API on mount; fall back to mock data on failure
+  useEffect(() => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
+    const apiKey = import.meta.env.VITE_OPERATOR_API_KEY
+    if (!apiBase || !apiKey) return
+
+    runMatchingApi(nGroups, groupSizeLimit)
+      .then((data) => {
+        if (!data) return
+        applyApiResult(data, nGroups)
+      })
+      .catch((err) => {
+        console.warn('[Blom] API load failed — using mock data', err)
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const applyApiResult = (data: { attendees: Attendee[]; assignment: GroupAssignment }, forNGroups: number) => {
+    const apiAttendees: Attendee[] = data.attendees
+    const apiAssignment: GroupAssignment = data.assignment
+
+    const apiGroupLayout: GroupLayout[] = apiAssignment.groups.map((g: { group_id: string }, i: number) => ({
+      group_id: g.group_id,
+      color: GROUP_COLORS[i % GROUP_COLORS.length],
+      cx: GROUP_POSITIONS[i % GROUP_POSITIONS.length].cx,
+      cy: GROUP_POSITIONS[i % GROUP_POSITIONS.length].cy,
+    }))
+
+    setAttendees(apiAttendees)
+    setGroupLayout(apiGroupLayout)
+    setAssignment(apiAssignment)
+    setNGroups(forNGroups)
+    setNGroupsInput(String(forNGroups))
+    // Re-run replaces the stash — reset now targets this new run
+    setAlgorithmGroups({ attendees: apiAttendees, groupLayout: apiGroupLayout })
+    setIsFrozen(false)
+    setHasImportedStragglers(false)
+    setStragglerMessage(null)
+    clearSelection()
+    setResetKey((k) => k + 1)
+  }
+
+  const handleRerun = () => {
+    const requested = nGroups
+    const requestedMax = groupSizeLimit
+    setIsRerunning(true)
+    runMatchingApi(requested, requestedMax)
+      .then((data) => {
+        if (data) applyApiResult(data, requested)
+      })
+      .catch((err) => {
+        console.warn('[Blom] Re-run failed', err)
+      })
+      .finally(() => setIsRerunning(false))
+  }
 
   function approveAssignment(currentAttendees: Attendee[]) {
     const payload = currentAttendees.map(a => ({ userId: a.pipeline_user_id, groupId: a.group_id }))
@@ -70,8 +167,15 @@ export default function App() {
   }
 
   const handleReset = () => {
-    setAttendees(MOCK_ATTENDEES)
-    setGroupLayout(DEFAULT_GROUP_LAYOUT)
+    // Read from stash if API has loaded; otherwise fall back to mock data
+    const stash = useCanvasStore.getState().algorithmGroups
+    if (stash) {
+      setAttendees(stash.attendees)
+      setGroupLayout(stash.groupLayout)
+    } else {
+      setAttendees(MOCK_ATTENDEES)
+      setGroupLayout(DEFAULT_GROUP_LAYOUT)
+    }
     setIsFrozen(false)
     setHasImportedStragglers(false)
     setStragglerMessage(null)
@@ -134,10 +238,10 @@ export default function App() {
     count: attendees.filter((a) => a.group_id === gl.group_id).length,
   }))
 
-  // Sync MOCK_ASSIGNMENT user_ids with live attendees for panel move buttons
-  const liveAssignment = {
-    ...MOCK_ASSIGNMENT,
-    groups: MOCK_ASSIGNMENT.groups.map((g) => ({
+  // Sync group user_ids with live attendees state (handles drags, deletes, imports)
+  const liveAssignment: GroupAssignment = {
+    ...assignment,
+    groups: assignment.groups.map((g) => ({
       ...g,
       user_ids: attendees.filter((a) => a.group_id === g.group_id).map((a) => a.pipeline_user_id),
     })),
@@ -181,6 +285,52 @@ export default function App() {
               <option key={ev.name} value={ev.name}>{ev.name}</option>
             ))}
           </select>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#64748b', fontSize: 12, fontFamily: 'system-ui, sans-serif' }}>
+            Groups:
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={nGroupsInput}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => {
+                setNGroupsInput(e.target.value)
+                const v = parseInt(e.target.value, 10)
+                if (!isNaN(v) && v > 0) setNGroups(v)
+              }}
+              onBlur={() => {
+                const v = parseInt(nGroupsInput, 10)
+                setNGroupsInput(String(!isNaN(v) && v > 0 ? v : nGroups))
+              }}
+              style={{
+                width: 44,
+                background: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: 6,
+                color: '#e2e8f0',
+                fontSize: 12,
+                padding: '4px 6px',
+                fontFamily: 'system-ui, sans-serif',
+              }}
+            />
+          </label>
+          <button
+            onClick={handleRerun}
+            disabled={isRerunning}
+            title="Re-run algorithm with current group count"
+            style={{
+              background: isRerunning ? 'transparent' : '#0f2d4a',
+              border: `1px solid ${isRerunning ? '#334155' : '#0ea5e9'}`,
+              borderRadius: 6,
+              color: isRerunning ? '#475569' : '#38bdf8',
+              fontSize: 12,
+              padding: '4px 10px',
+              fontFamily: 'system-ui, sans-serif',
+              cursor: isRerunning ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {isRerunning ? 'Running…' : 'Re-run'}
+          </button>
           <label style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#64748b', fontSize: 12, fontFamily: 'system-ui, sans-serif' }}>
             Max/group:
             <input

@@ -49,3 +49,7 @@ frontend/*/build/
 # Planning / AI tooling — proprietary, not for public repo
 .claude/
 .paul/
+
+# Personal reference docs
+PLATFORMS.md
+INTERVIEW_PREP.md

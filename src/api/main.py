@@ -4,6 +4,9 @@ import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
 
+from dotenv import load_dotenv
+load_dotenv()  # loads .env for local dev; no-op when env vars already set (Railway)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -32,6 +35,7 @@ app.add_middleware(
     allow_origins=[
         "https://nitinmohan.dev",
         "https://operator.blom.social",
+        "https://blom-matching.vercel.app",
         "http://localhost:5173",
     ],
     allow_methods=["GET", "POST", "PATCH"],
