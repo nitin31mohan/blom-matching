@@ -83,10 +83,12 @@ async def run_matching(
 
     # 4. Build affinity matrix + assign groups
     # assignment_config uses "assignment" key (assign_groups reads assignment.target_group_size etc.)
+    k_groups = math.ceil(n_attendees / effective_target)
     assignment_config = {
         "assignment": {
-            "group_size_min": 2,          # floor: at least 2 per group (social minimum)
-            "group_size_max": n_attendees, # no algorithmic cap — n_groups drives group count
+            "group_size_min": 2,
+            # cap at ceil(N/K)+1 so no group grows disproportionately large
+            "group_size_max": math.ceil(n_attendees / k_groups) + 1,
             "target_group_size": effective_target,
         }
     }

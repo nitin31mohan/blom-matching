@@ -201,6 +201,14 @@ def assign_groups(
 
     unassigned_ids.sort(key=_max_affinity, reverse=True)
 
+    # Seed: one user per empty group so all K groups have a positive cohesion
+    # baseline before the marginal-cohesion greedy pass. Without this, groups
+    # left empty after friend-pair pre-assignment score 0.0 and are never
+    # chosen, collapsing K=4 into however many pairs were placed.
+    for g in groups:
+        if not g and unassigned_ids:
+            g.append(unassigned_ids.pop(0))
+
     for uid in unassigned_ids:
         open_groups = [g for g in groups if len(g) < group_size_max]
 
