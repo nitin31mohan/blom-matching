@@ -86,7 +86,7 @@ async def run_matching(
     assignment_config = {
         "assignment": {
             "group_size_min": 2,          # floor: at least 2 per group (social minimum)
-            "group_size_max": body.max_group_size,
+            "group_size_max": n_attendees, # no algorithmic cap — n_groups drives group count
             "target_group_size": effective_target,
         }
     }

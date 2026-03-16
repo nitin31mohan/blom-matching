@@ -47,7 +47,7 @@ export default function App() {
   }, [])
 
   // Shared API fetch — called on mount and by "Re-run" button
-  const runMatchingApi = async (requestedNGroups: number, requestedMaxGroupSize: number) => {
+  const runMatchingApi = async (requestedNGroups: number) => {
     const apiBase = import.meta.env.VITE_API_BASE_URL
     const apiKey = import.meta.env.VITE_OPERATOR_API_KEY
     if (!apiBase || !apiKey) return
@@ -69,7 +69,6 @@ export default function App() {
       body: JSON.stringify({
         sensitive_field_mode: 'neutral',
         n_groups: requestedNGroups,
-        max_group_size: requestedMaxGroupSize,
       }),
     })
     if (!runRes.ok) throw new Error(`run failed: ${runRes.status}`)
@@ -82,7 +81,7 @@ export default function App() {
     const apiKey = import.meta.env.VITE_OPERATOR_API_KEY
     if (!apiBase || !apiKey) return
 
-    runMatchingApi(nGroups, groupSizeLimit)
+    runMatchingApi(nGroups)
       .then((data) => {
         if (!data) return
         applyApiResult(data, nGroups)
@@ -119,9 +118,8 @@ export default function App() {
 
   const handleRerun = () => {
     const requested = nGroups
-    const requestedMax = groupSizeLimit
     setIsRerunning(true)
-    runMatchingApi(requested, requestedMax)
+    runMatchingApi(requested)
       .then((data) => {
         if (data) applyApiResult(data, requested)
       })
