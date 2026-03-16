@@ -230,6 +230,28 @@ def assign_groups(
         assigned.add(uid)
 
     # ------------------------------------------------------------------
+    # Step 2.5: Rebalance — enforce group_size_min as a hard floor
+    #
+    # The greedy pass caps at group_size_max but doesn't guarantee a
+    # minimum fill. When N doesn't divide evenly (e.g. 16 / 3), one group
+    # can end up with too few members. We steal from the largest donor
+    # that can afford to give (len > group_size_min), moving the member
+    # who adds the most value to the small group.
+    # ------------------------------------------------------------------
+    for _ in range(N):  # bounded to prevent infinite loops
+        under = [g for g in groups if len(g) < group_size_min]
+        if not under:
+            break
+        small = min(under, key=len)
+        donors = [g for g in groups if g is not small and len(g) > group_size_min]
+        if not donors:
+            break
+        large = max(donors, key=len)
+        best_uid = max(large, key=lambda uid: marginal_cohesion(affinity, uid, small))
+        large.remove(best_uid)
+        small.append(best_uid)
+
+    # ------------------------------------------------------------------
     # Step 3: Build Group objects
     # ------------------------------------------------------------------
     fit_config = config if config is not None else _CONFIG
