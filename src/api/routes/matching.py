@@ -44,12 +44,12 @@ async def run_matching(
 ) -> dict:
     # 1. Generate deterministic synthetic fixture (seed=42 for demo stability)
     n_attendees = 16
-    # n_groups overrides target_group_size: distribute attendees evenly across requested groups
-    effective_target = (
-        math.ceil(n_attendees / body.n_groups)
-        if body.n_groups and body.n_groups > 0
-        else body.target_group_size
-    )
+    max_gs = body.max_group_size
+    # Minimum groups needed so every group fits within max_group_size+1
+    min_groups_needed = math.ceil(n_attendees / (max_gs + 1))
+    # Respect admin's n_groups but never fewer than min_groups_needed
+    effective_n_groups = max(body.n_groups or 1, min_groups_needed)
+    effective_target = math.ceil(n_attendees / effective_n_groups)
     fixture = generate_event_fixture(
         event_type="social",
         n_attendees=n_attendees,
@@ -83,12 +83,10 @@ async def run_matching(
 
     # 4. Build affinity matrix + assign groups
     # assignment_config uses "assignment" key (assign_groups reads assignment.target_group_size etc.)
-    k_groups = math.ceil(n_attendees / effective_target)
     assignment_config = {
         "assignment": {
-            "group_size_min": 2,
-            # cap at ceil(N/K)+1 so no group grows disproportionately large
-            "group_size_max": math.ceil(n_attendees / k_groups) + 1,
+            "group_size_min": max(2, max_gs - 1),
+            "group_size_max": max_gs + 1,
             "target_group_size": effective_target,
         }
     }
@@ -122,6 +120,7 @@ async def run_matching(
     return {
         "status": "ok",
         "event_id": event_id,
+        "actual_n_groups": len(assignment.groups),
         "assignment": assignment.model_dump(),
         "attendees": attendees_out,
     }

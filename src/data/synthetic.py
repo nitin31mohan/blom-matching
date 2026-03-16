@@ -47,6 +47,9 @@ class RawQuizResponse(BaseModel):
     name: str
     friend_pair_id: Optional[str] = None
 
+    # --- Demographic (not PII — flows through pipeline) ---
+    age: Optional[int] = None
+
     # --- Categorical quiz fields ---
     gender: Optional[str] = None
     industry: Optional[str] = None
@@ -419,6 +422,9 @@ def generate_event_fixture(
     names = _generate_names(n_attendees, rng)
     ids = [str(uuid.UUID(int=int(rng.integers(0, 2**63)))) for _ in range(n_attendees)]
 
+    # Generate ages: normal(μ=30, σ=7), clamped [18, 60]
+    ages = [int(np.clip(rng.normal(loc=30, scale=7), 18, 60)) for _ in range(n_attendees)]
+
     # Assemble mutable dicts for edge-case injection
     records: list[dict] = []
     for k in range(n_attendees):
@@ -426,6 +432,7 @@ def generate_event_fixture(
             "id":             ids[k],
             "name":           f"{names[k][0]} {names[k][1]}",
             "friend_pair_id": None,
+            "age":            ages[k],
         }
         for field in LIKERT_FIELDS:
             rec[field] = int(likert_arrays[field][k])

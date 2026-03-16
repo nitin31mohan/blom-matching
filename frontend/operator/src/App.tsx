@@ -92,9 +92,10 @@ export default function App() {
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const applyApiResult = (data: { attendees: Attendee[]; assignment: GroupAssignment }, forNGroups: number) => {
+  const applyApiResult = (data: { attendees: Attendee[]; assignment: GroupAssignment; actual_n_groups?: number }, forNGroups: number) => {
     const apiAttendees: Attendee[] = data.attendees
     const apiAssignment: GroupAssignment = data.assignment
+    const actualNGroups = data.actual_n_groups ?? forNGroups
 
     const apiGroupLayout: GroupLayout[] = apiAssignment.groups.map((g: { group_id: string }, i: number) => ({
       group_id: g.group_id,
@@ -106,8 +107,8 @@ export default function App() {
     setAttendees(apiAttendees)
     setGroupLayout(apiGroupLayout)
     setAssignment(apiAssignment)
-    setNGroups(forNGroups)
-    setNGroupsInput(String(forNGroups))
+    setNGroups(actualNGroups)
+    setNGroupsInput(String(actualNGroups))
     setAlgorithmGroups({ attendees: apiAttendees, groupLayout: apiGroupLayout })
     setIsFrozen(false)
     setHasImportedStragglers(false)

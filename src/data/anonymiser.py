@@ -26,8 +26,8 @@ from pydantic import BaseModel, ConfigDict
 # Constants
 # ---------------------------------------------------------------------------
 
-# The 20 quiz response fields that travel through the matching pipeline.
-# Derived from SKILL-feature-engineering.md input schema.
+# The 21 quiz/demographic fields that travel through the matching pipeline.
+# Derived from SKILL-feature-engineering.md input schema + age demographic.
 QUIZ_FIELDS: list[str] = [
     "gender",
     "industry",
@@ -49,6 +49,7 @@ QUIZ_FIELDS: list[str] = [
     "weekend_energy_level",
     "preferred_activity_time",
     "humour_style",
+    "age",  # demographic — not PII, flows through pipeline for age-homogeneity matching
 ]
 
 # Likert fields that may be perturbed during demo export.

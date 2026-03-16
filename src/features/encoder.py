@@ -55,6 +55,9 @@ NOMINAL_OPTIONS: dict[str, list[str]] = {
     "humour_style": ["playful", "situational_observational", "witty_sarcastic", "bold_edgy"],
 }
 
+#: Age field — normalised scalar [0, 1] over the realistic attendee range.
+AGE_MIN, AGE_MAX = 18, 60
+
 #: Sensitive categoricals — included only when sensitive_field_mode != "neutral".
 SENSITIVE_OPTIONS: dict[str, list[str]] = {
     "country": [
@@ -184,6 +187,14 @@ def _encode_quiz(
         val = quiz.get(field)
         raw_encoded[field] = [1.0 if opt == val else 0.0 for opt in options]
 
+    # Age — normalised scalar [0, 1]; midpoint imputation if absent (does not count toward
+    # low_profile_confidence since age is demographic, not a skipped quiz question)
+    raw_age = quiz.get("age")
+    if raw_age is None:
+        raw_encoded["age"] = 0.5
+    else:
+        raw_encoded["age"] = max(0.0, min(1.0, (int(raw_age) - AGE_MIN) / (AGE_MAX - AGE_MIN)))
+
     return raw_encoded, imputed_fields, flags
 
 
@@ -211,6 +222,9 @@ def _build_weighted_vector(raw_encoded: dict, mode: str) -> list[float]:
         # Weight is 1.0 in affinity/diversity mode (DIMENSION_GROUPS default 0.0 is neutral-only)
         for field in SENSITIVE_OPTIONS:
             dims.extend(v * 1.0 for v in raw_encoded[field])
+
+    # Age scalar — always included; weight 1.2 gives moderate same-age preference
+    dims.append(raw_encoded.get("age", 0.5) * 1.2)
 
     return dims
 
@@ -280,6 +294,10 @@ def get_dimension_index_map(config: dict | None = None) -> dict[str, list[int]]:
         for field, options in SENSITIVE_OPTIONS.items():
             result[field] = list(range(idx, idx + len(options)))
             idx += len(options)
+
+    # Age scalar — always present
+    result["age"] = [idx]
+    idx += 1  # noqa: F841
 
     return result
 
