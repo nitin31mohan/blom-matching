@@ -29,6 +29,7 @@ export default function App() {
   const [groupLayout, setGroupLayout] = useState<GroupLayout[]>(DEFAULT_GROUP_LAYOUT)
   const [isFrozen, setIsFrozen] = useState(false)
   const [hasImportedStragglers, setHasImportedStragglers] = useState(false)
+  const [importedStragglers, setImportedStragglers] = useState<Attendee[]>([])
   const [groupSizeLimit, setGroupSizeLimit] = useState(5)
   const [groupSizeLimitInput, setGroupSizeLimitInput] = useState('5')
   const [stragglerMessage, setStragglerMessage] = useState<string | null>(null)
@@ -107,21 +108,39 @@ export default function App() {
     setAssignment(apiAssignment)
     setNGroups(forNGroups)
     setNGroupsInput(String(forNGroups))
-    // Re-run replaces the stash — reset now targets this new run
     setAlgorithmGroups({ attendees: apiAttendees, groupLayout: apiGroupLayout })
     setIsFrozen(false)
     setHasImportedStragglers(false)
+    setImportedStragglers([])
     setStragglerMessage(null)
     clearSelection()
     setResetKey((k) => k + 1)
+    return { apiAttendees, apiGroupLayout }
   }
 
   const handleRerun = () => {
     const requested = nGroups
+    const stragglers = importedStragglers
     setIsRerunning(true)
     runMatchingApi(requested)
       .then((data) => {
-        if (data) applyApiResult(data, requested)
+        if (!data) return
+        const { apiAttendees, apiGroupLayout } = applyApiResult(data, requested)
+        if (stragglers.length > 0) {
+          const groupIds = apiGroupLayout.map(gl => gl.group_id)
+          const placed = placeAllStragglers(
+            stragglers.map(a => ({ ...a, group_id: '', isApproved: false })),
+            apiAttendees,
+            groupIds,
+            activeProfile,
+            pairScores,
+          )
+          setAttendees(prev => [...prev, ...placed])
+          setImportedStragglers(placed)
+          setHasImportedStragglers(true)
+          setStragglerMessage(`${placed.length} sign-up${placed.length > 1 ? 's' : ''} re-placed in new groupings`)
+          setResetKey(k => k + 1)
+        }
       })
       .catch((err) => {
         console.warn('[Blom] Re-run failed', err)
@@ -159,6 +178,7 @@ export default function App() {
     const groupIds = groupLayout.map(gl => gl.group_id)
     const placed = placeAllStragglers(incoming, attendees, groupIds, activeProfile, pairScores)
     setAttendees(prev => [...prev, ...placed])
+    setImportedStragglers(placed)
     setHasImportedStragglers(true)
     setStragglerMessage(`${placed.length} new sign-up${placed.length > 1 ? 's' : ''} found — placed in best-fit groups`)
     setResetKey(k => k + 1)
@@ -176,6 +196,7 @@ export default function App() {
     }
     setIsFrozen(false)
     setHasImportedStragglers(false)
+    setImportedStragglers([])
     setStragglerMessage(null)
     clearSelection()
     setResetKey((k) => k + 1)
