@@ -131,7 +131,7 @@ export default function App() {
         if (stragglers.length > 0) {
           const groupIds = apiGroupLayout.map(gl => gl.group_id)
           const totalN = apiAttendees.length + stragglers.length
-          const stragglerCap = Math.ceil(totalN / groupIds.length) + 1
+          const stragglerCap = Math.ceil(totalN / groupIds.length)
           const placed = placeAllStragglers(
             stragglers.map(a => ({ ...a, group_id: '', isApproved: false })),
             apiAttendees,
@@ -182,7 +182,7 @@ export default function App() {
     }
     const groupIds = groupLayout.map(gl => gl.group_id)
     const totalN = attendees.length + incoming.length
-    const stragglerCap = Math.ceil(totalN / groupIds.length) + 1
+    const stragglerCap = Math.ceil(totalN / groupIds.length)
     const placed = placeAllStragglers(incoming, attendees, groupIds, activeProfile, pairScores, stragglerCap)
     setAttendees(prev => [...prev, ...placed])
     setImportedStragglers(placed)
@@ -215,7 +215,7 @@ export default function App() {
     const deletedMembers = attendees.filter(a => a.group_id === groupId)
     const remainingAttendees = attendees.filter(a => a.group_id !== groupId)
     const remainingGroupIds = remainingLayout.map(gl => gl.group_id)
-    const deleteCap = Math.ceil(attendees.length / remainingGroupIds.length) + 1
+    const deleteCap = Math.ceil(attendees.length / remainingGroupIds.length)
     const placed = placeAllStragglers(
       deletedMembers.map(a => ({ ...a, group_id: '', isApproved: false })),
       remainingAttendees,
