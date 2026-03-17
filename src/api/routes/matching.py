@@ -84,6 +84,7 @@ async def run_matching(
     # assignment_config uses "assignment" key (assign_groups reads assignment.target_group_size etc.)
     assignment_config = {
         "assignment": {
+            "n_groups": effective_n_groups,   # passed directly so K is never re-derived
             "group_size_min": max(1, max_gs - 1),
             "group_size_max": max_gs + 1,
             "target_group_size": effective_target,

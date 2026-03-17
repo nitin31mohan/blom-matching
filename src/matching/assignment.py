@@ -156,7 +156,10 @@ def assign_groups(
     fv_map: dict[str, UserFeatureVector] = {fv.user_id: fv for fv in feature_vectors}
     partner_map = build_friend_pair_map(user_ids, friend_pair_ids)
 
-    K = max(1, math.ceil(N / target_group_size))
+    # Use admin's explicit group count when provided — never re-derive from target_group_size
+    # (double-ceiling ceil(N/ceil(N/k)) ≠ k in general, e.g. N=16 k=5 gives 4)
+    K = acfg.get("n_groups") or max(1, math.ceil(N / target_group_size))
+    K = max(1, min(K, N))  # guard: at least 1, at most N (can't have empty groups forever)
     groups: list[list[str]] = [[] for _ in range(K)]
     assigned: set[str] = set()
 
