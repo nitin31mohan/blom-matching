@@ -30,14 +30,15 @@ export default function App() {
   const [isFrozen, setIsFrozen] = useState(false)
   const [hasImportedStragglers, setHasImportedStragglers] = useState(false)
   const [importedStragglers, setImportedStragglers] = useState<Attendee[]>([])
-  const [groupSizeLimit, setGroupSizeLimit] = useState(5)
-  const [groupSizeLimitInput, setGroupSizeLimitInput] = useState('5')
   const [stragglerMessage, setStragglerMessage] = useState<string | null>(null)
   const [nGroups, setNGroups] = useState(4)
   const [nGroupsInput, setNGroupsInput] = useState('4')
   const [isRerunning, setIsRerunning] = useState(false)
   const { clearSelection, setAlgorithmGroups } = useCanvasStore()
   const { selectedAttendeeId, selectAttendee } = useCanvasStore()
+
+  // Derived: max attendees per group — recalculates live as attendees or nGroups change
+  const maxPerGroup = Math.ceil(Math.max(1, attendees.length) / Math.max(1, nGroups))
 
   const activeProfile = getActivityProfile(selectedEvent)
 
@@ -310,7 +311,7 @@ export default function App() {
             <input
               type="number"
               min={1}
-              max={20}
+              max={Math.max(1, attendees.length)}
               value={nGroupsInput}
               onFocus={(e) => e.target.select()}
               onChange={(e) => {
@@ -351,41 +352,9 @@ export default function App() {
           >
             {isRerunning ? 'Running…' : 'Re-run'}
           </button>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#64748b', fontSize: 12, fontFamily: 'system-ui, sans-serif' }}>
-            Max/group:
-            <input
-              type="number"
-              list="group-size-presets"
-              min={1}
-              max={50}
-              value={groupSizeLimitInput}
-              onFocus={(e) => e.target.select()}
-              onChange={(e) => {
-                setGroupSizeLimitInput(e.target.value)
-                const v = parseInt(e.target.value, 10)
-                if (!isNaN(v) && v > 0) setGroupSizeLimit(v)
-              }}
-              onBlur={() => {
-                const v = parseInt(groupSizeLimitInput, 10)
-                setGroupSizeLimitInput(String(!isNaN(v) && v > 0 ? v : groupSizeLimit))
-              }}
-              style={{
-                width: 52,
-                background: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: 6,
-                color: '#e2e8f0',
-                fontSize: 12,
-                padding: '4px 6px',
-                fontFamily: 'system-ui, sans-serif',
-              }}
-            />
-            <datalist id="group-size-presets">
-              {[3, 4, 5, 6, 7, 8, 10, 12, 15].map(n => (
-                <option key={n} value={n} />
-              ))}
-            </datalist>
-          </label>
+          <span style={{ color: '#64748b', fontSize: 12, fontFamily: 'system-ui, sans-serif' }}>
+            ≤{maxPerGroup}/group
+          </span>
           <button
             onClick={() => setViewMode(m => m === 'simple' ? 'detailed' : 'simple')}
             title="Toggle between simple and detailed fit view"
@@ -534,7 +503,7 @@ export default function App() {
             pairScores={pairScores}
             viewMode={viewMode}
             isFrozen={isFrozen}
-            groupSizeLimit={groupSizeLimit}
+            groupSizeLimit={maxPerGroup + 1}
           />
         </div>
 

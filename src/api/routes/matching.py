@@ -44,12 +44,11 @@ async def run_matching(
 ) -> dict:
     # 1. Generate deterministic synthetic fixture (seed=42 for demo stability)
     n_attendees = 16
-    max_gs = body.max_group_size
-    # Minimum groups needed so every group fits within max_group_size+1
-    min_groups_needed = math.ceil(n_attendees / (max_gs + 1))
-    # Respect admin's n_groups but never fewer than min_groups_needed
-    effective_n_groups = max(body.n_groups or 1, min_groups_needed)
-    effective_target = math.ceil(n_attendees / effective_n_groups)
+    # n_groups drives everything; cap at n_attendees so every group has ≥1 person
+    effective_n_groups = max(1, min(body.n_groups, n_attendees))
+    # max_gs derived from group count — ±1 tolerance applied below
+    max_gs = math.ceil(n_attendees / effective_n_groups)
+    effective_target = max_gs
     fixture = generate_event_fixture(
         event_type="social",
         n_attendees=n_attendees,
@@ -85,7 +84,7 @@ async def run_matching(
     # assignment_config uses "assignment" key (assign_groups reads assignment.target_group_size etc.)
     assignment_config = {
         "assignment": {
-            "group_size_min": max(2, max_gs - 1),
+            "group_size_min": max(1, max_gs - 1),
             "group_size_max": max_gs + 1,
             "target_group_size": effective_target,
         }
@@ -121,6 +120,7 @@ async def run_matching(
         "status": "ok",
         "event_id": event_id,
         "actual_n_groups": len(assignment.groups),
+        "max_per_group": max_gs,
         "assignment": assignment.model_dump(),
         "attendees": attendees_out,
     }

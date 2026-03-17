@@ -8,10 +8,8 @@ from pydantic import BaseModel, ConfigDict
 class RunMatchingRequest(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    target_group_size: int = 5
     sensitive_field_mode: Literal["neutral", "affinity", "diversity"] = "neutral"
-    n_groups: int | None = None        # overrides target_group_size when set
-    max_group_size: int = 5            # binding ±1 constraint on group size
+    n_groups: int = 4                  # admin-chosen group count; drives all size constraints
 
 
 class OverrideRequest(BaseModel):
